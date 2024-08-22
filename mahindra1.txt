@@ -1,0 +1,620 @@
+Enter password: *************
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 14
+Server version: 8.0.38 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| college            |
+| information_schema |
+| jaat               |
+| mahi               |
+| mahi5              |
+| mysql              |
+| performance_schema |
+| sakila             |
+| sys                |
+| xyz                |
++--------------------+
+10 rows in set (0.00 sec)
+
+mysql> use mahi;
+Database changed
+mysql> create databases mahi5-2;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'databases mahi5-2' at line 1
+mysql> create databases mahi52;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'databases mahi52' at line 1
+mysql> create database mahi5-2;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '-2' at line 1
+mysql> create database mahi52;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> use mahi52;
+Database changed
+mysql> create table studentMarks(rollNum INT Primary Key,name VARCHAR(100),marks INT);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create table result(rollNum INT, name VARCHAR(100), grade VARCHAR(25),foreign key(rollNum) references studentMarks(rollNum));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> delimiter //
+mysql> create procedure insertStudent(IN r INT, n VARCHAR(100), m INT)
+    -> begin
+    -> insert into studentMarks values(r, n, m);
+    -> end //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter;
+    -> call insertStudent(1, 'John Doe', 85);
+    -> end //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delimiter;call insertStudent(1, 'John Doe', 85);
+end' at line 1
+mysql>
+mysql> call insertStudent(1, 'John Doe', 85);
+    -> //
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  select * from studentMarks;
+    -> //
++---------+----------+-------+
+| rollNum | name     | marks |
++---------+----------+-------+
+|       1 | John Doe |    85 |
++---------+----------+-------+
+1 row in set (0.01 sec)
+
+mysql> call insertStudent(2,'Aditya',1300);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call insertStudent(3,'Anurag',1400);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call insertStudent(4,'Asim',990);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call insertStudent(5,'Aryan',989);//
+Query OK, 1 row affected (0.00 sec)
+
+mysql> call insertStudent(6,'Aneesh',900);//
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from studentMarks;//
++---------+----------+-------+
+| rollNum | name     | marks |
++---------+----------+-------+
+|       1 | John Doe |    85 |
+|       2 | Aditya   |  1300 |
+|       3 | Anurag   |  1400 |
+|       4 | Asim     |   990 |
+|       5 | Aryan    |   989 |
+|       6 | Aneesh   |   900 |
++---------+----------+-------+
+6 rows in set (0.00 sec)
+
+mysql> call insertStudent(7,'Abhishek',899);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call insertStudent(8,'Amit',840);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call insertStudent(9,'Anay',800);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from studentMarks;
+    -> //
++---------+----------+-------+
+| rollNum | name     | marks |
++---------+----------+-------+
+|       1 | John Doe |    85 |
+|       2 | Aditya   |  1300 |
+|       3 | Anurag   |  1400 |
+|       4 | Asim     |   990 |
+|       5 | Aryan    |   989 |
+|       6 | Aneesh   |   900 |
+|       7 | Abhishek |   899 |
+|       8 | Amit     |   840 |
+|       9 | Anay     |   800 |
++---------+----------+-------+
+9 rows in set (0.00 sec)
+
+mysql>
+mysql> delimiter //
+mysql> create procedure calculateGrade(IN roll INT,OUT class VARCHAR(25))
+    -> begin
+    -> declare c varchar(25);
+    -> declare m int;
+    -> declare n varchar(100);
+    -> select marks into m from studentMarks where rollNum = roll;
+    -> select name into n from studentMarks where rollNum = roll;
+    -> if m>=990 and m<=1500 then
+    -> set c='Distinction';
+    -> elseif m>=900 and m<=989 then
+    -> set c='First Class';
+    -> elseif m>=825 and m<=899 then
+    -> set c='Higher Second Class';
+    -> else
+    -> set c='N/A';
+    -> end if;
+    -> insert into result values(roll,n,c);
+    -> set class=c;
+    -> end //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter;
+    -> //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delimiter' at line 1
+mysql>
+mysql> delimiter //
+mysql> create function displayGrade(roll int)
+    -> returns varchar(25)
+    -> deterministic
+    -> begin
+    -> declare c varchar(25);
+    -> declare m int;
+    -> declare n varchar(100);
+    -> select marks into m from studentMarks where rollNum = roll;
+    -> select name into n from studentMarks where rollNum = roll;
+    -> if m>=990 and m<=1500 then
+    -> set c='Distinction';
+    -> elseif m>=900 and m<=989 then
+    -> set c='First Class';
+    -> elseif m>=825 and m<=899 then
+    -> set c='Higher Second Class';
+    -> else
+    -> set c='N/A';
+    -> end if;
+    -> insert into result values(roll,n,c);
+    -> return c;
+    -> end//
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter ;
+mysql> call calculateGrade(1,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select @class;
++--------+
+| @class |
++--------+
+| N/A    |
++--------+
+1 row in set (0.00 sec)
+
+mysql> //
+    -> end//
+    -> //
+    -> $$
+    -> clear
+    -> cls//
+    -> end //
+    -> end//
+    -> ^C
+mysql> call calculateGrade(1,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(1,@class);//
+Query OK, 1 row affected (0.01 sec)
+
+    -> select @class;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '//
+select @class' at line 1
+mysql> select @class;
++--------+
+| @class |
++--------+
+| N/A    |
++--------+
+1 row in set (0.00 sec)
+
+mysql> call calculateGrade(2,@class);//
+Query OK, 1 row affected (0.01 sec)
+
+    -> call calculateGrade(3,@class);//
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '//
+call calculateGrade(3,@class)' at line 1
+    -> ^C
+mysql> call calculateGrade(3,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(4,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(5,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(6,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(7,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(8,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from result;
++---------+----------+---------------------+
+| rollNum | name     | grade               |
++---------+----------+---------------------+
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       2 | Aditya   | Distinction         |
+|       3 | Anurag   | Distinction         |
+|       4 | Asim     | Distinction         |
+|       5 | Aryan    | First Class         |
+|       6 | Aneesh   | First Class         |
+|       7 | Abhishek | Higher Second Class |
+|       8 | Amit     | Higher Second Class |
++---------+----------+---------------------+
+10 rows in set (0.00 sec)
+
+mysql> select displayGrade(1);
++-----------------+
+| displayGrade(1) |
++-----------------+
+| N/A             |
++-----------------+
+1 row in set (0.01 sec)
+
+mysql>  select displayGrade(4);
++-----------------+
+| displayGrade(4) |
++-----------------+
+| Distinction     |
++-----------------+
+1 row in set (0.01 sec)
+
+mysql>  select displayGrade(7);
++---------------------+
+| displayGrade(7)     |
++---------------------+
+| Higher Second Class |
++---------------------+
+1 row in set (0.01 sec)
+
+mysql> > select displayGrade(9);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '> select displayGrade(9)' at line 1
+mysql>
+mysql> call calculateGrade(9,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  select @class;
++--------+
+| @class |
++--------+
+| N/A    |
++--------+
+1 row in set (0.00 sec)
+
+mysql>  select * from result;
++---------+----------+---------------------+
+| rollNum | name     | grade               |
++---------+----------+---------------------+
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       2 | Aditya   | Distinction         |
+|       3 | Anurag   | Distinction         |
+|       4 | Asim     | Distinction         |
+|       5 | Aryan    | First Class         |
+|       6 | Aneesh   | First Class         |
+|       7 | Abhishek | Higher Second Class |
+|       8 | Amit     | Higher Second Class |
+|       1 | John Doe | N/A                 |
+|       4 | Asim     | Distinction         |
+|       7 | Abhishek | Higher Second Class |
+|       9 | Anay     | N/A                 |
++---------+----------+---------------------+
+14 rows in set (0.00 sec)
+
+mysql>  call calculateGrade(10,@class);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`mahi52`.`result`, CONSTRAINT `result_ibfk_1` FOREIGN KEY (`rollNum`) REFERENCES `studentmarks` (`rollNum`))
+mysql>
+mysql> call insertStudent(10,'mahindra',1000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from studentMarks;
++---------+----------+-------+
+| rollNum | name     | marks |
++---------+----------+-------+
+|       1 | John Doe |    85 |
+|       2 | Aditya   |  1300 |
+|       3 | Anurag   |  1400 |
+|       4 | Asim     |   990 |
+|       5 | Aryan    |   989 |
+|       6 | Aneesh   |   900 |
+|       7 | Abhishek |   899 |
+|       8 | Amit     |   840 |
+|       9 | Anay     |   800 |
+|      10 | mahindra |  1000 |
++---------+----------+-------+
+10 rows in set (0.00 sec)
+
+mysql>  call calculateGrade(10,@class);
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  select displayGrade(10);
++------------------+
+| displayGrade(10) |
++------------------+
+| Distinction      |
++------------------+
+1 row in set (0.01 sec)
+
+mysql>  select * from result;
++---------+----------+---------------------+
+| rollNum | name     | grade               |
++---------+----------+---------------------+
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       2 | Aditya   | Distinction         |
+|       3 | Anurag   | Distinction         |
+|       4 | Asim     | Distinction         |
+|       5 | Aryan    | First Class         |
+|       6 | Aneesh   | First Class         |
+|       7 | Abhishek | Higher Second Class |
+|       8 | Amit     | Higher Second Class |
+|       1 | John Doe | N/A                 |
+|       4 | Asim     | Distinction         |
+|       7 | Abhishek | Higher Second Class |
+|       9 | Anay     | N/A                 |
+|      10 | mahindra | Distinction         |
+|      10 | mahindra | Distinction         |
++---------+----------+---------------------+
+16 rows in set (0.00 sec)
+
+mysql> DROP PROCEDURE IF EXISTS calculateGrade;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> DROP FUNCTION IF EXISTS displayGrade;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql>  select * from result;
++---------+----------+---------------------+
+| rollNum | name     | grade               |
++---------+----------+---------------------+
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       1 | John Doe | N/A                 |
+|       2 | Aditya   | Distinction         |
+|       3 | Anurag   | Distinction         |
+|       4 | Asim     | Distinction         |
+|       5 | Aryan    | First Class         |
+|       6 | Aneesh   | First Class         |
+|       7 | Abhishek | Higher Second Class |
+|       8 | Amit     | Higher Second Class |
+|       1 | John Doe | N/A                 |
+|       4 | Asim     | Distinction         |
+|       7 | Abhishek | Higher Second Class |
+|       9 | Anay     | N/A                 |
+|      10 | mahindra | Distinction         |
+|      10 | mahindra | Distinction         |
++---------+----------+---------------------+
+16 rows in set (0.00 sec)
+
+mysql> TRUNCATE TABLE result;
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select * from result;
+Empty set (0.00 sec)
+
+mysql> select * from studentMarks;
++---------+----------+-------+
+| rollNum | name     | marks |
++---------+----------+-------+
+|       1 | John Doe |    85 |
+|       2 | Aditya   |  1300 |
+|       3 | Anurag   |  1400 |
+|       4 | Asim     |   990 |
+|       5 | Aryan    |   989 |
+|       6 | Aneesh   |   900 |
+|       7 | Abhishek |   899 |
+|       8 | Amit     |   840 |
+|       9 | Anay     |   800 |
+|      10 | mahindra |  1000 |
++---------+----------+-------+
+10 rows in set (0.00 sec)
+
+mysql> delimiter //
+mysql> create procedure calculateGrade(IN roll INT, OUT class VARCHAR(25))
+    -> begin
+    ->     declare c varchar(25);
+    ->     declare m int;
+    ->     declare n varchar(100);
+    ->
+    ->     -- Get marks and name for the given roll number
+    ->     select marks into m from studentMarks where rollNum = roll;
+    ->     select name into n from studentMarks where rollNum = roll;
+    ->
+    ->     -- Determine the grade
+    ->     if m >= 990 and m <= 1500 then
+    ->         set c = 'Distinction';
+    ->     elseif m >= 900 and m <= 989 then
+    ->         set c = 'First Class';
+    ->     elseif m >= 825 and m <= 899 then
+    ->         set c = 'Higher Second Class';
+    ->     else
+    ->         set c = 'N/A';
+    ->     end if;
+    -> if exists (select 1 from result where rollNum = roll) then
+    ->         -- Update the existing record
+    ->         update result set name = n, grade = c where rollNum = roll;
+    ->     else
+    ->         -- Insert a new record
+    ->         insert into result values(roll, n, c);
+    ->     end if;
+    ->
+    ->     -- Set the OUT parameter
+    ->     set class = c;
+    -> end //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter ;
+mysql>
+mysql> delimiter //
+mysql> create function displayGrade(roll int)
+    -> returns varchar(25)
+    -> deterministic
+    -> begin
+    ->     declare c varchar(25);
+    ->     declare m int;
+    ->     declare n varchar(100);
+    ->
+    ->     -- Get marks and name for the given roll number
+    ->     select marks into m from studentMarks where rollNum = roll;
+    ->     select name into n from studentMarks where rollNum = roll;
+    ->
+    ->     -- Determine the grade
+    ->     if m >= 990 and m <= 1500 then
+    ->         set c = 'Distinction';
+    ->     elseif m >= 900 and m <= 989 then
+    ->         set c = 'First Class';
+    ->     elseif m >= 825 and m <= 899 then
+    ->         set c = 'Higher Second Class';
+    ->     else
+    ->         set c = 'N/A';
+    ->     end if;
+    ->
+    ->     -- Check if the roll number already exists in the result table
+    ->     if not exists (select 1 from result where rollNum = roll) then
+    ->         -- Insert a new record if it doesn't exist
+    ->         insert into result values(roll, n, c);
+    ->     else
+    ->         -- Update the existing record
+    ->         update result set name = n, grade = c where rollNum = roll;
+    ->     end if;
+    ->
+    ->     return c;
+    -> end //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter;
+    -> //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'delimiter' at line 1
+mysql>
+mysql>  select * from result;
+    -> call calculateGrade(1, @class);
+    -> //
+Empty set (0.00 sec)
+
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  select * from result;
+    -> //
++---------+----------+-------+
+| rollNum | name     | grade |
++---------+----------+-------+
+|       1 | John Doe | N/A   |
++---------+----------+-------+
+1 row in set (0.00 sec)
+
+mysql> call calculateGrade(1, @class);
+    -> //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql>  select * from result;//
++---------+----------+-------+
+| rollNum | name     | grade |
++---------+----------+-------+
+|       1 | John Doe | N/A   |
++---------+----------+-------+
+1 row in set (0.00 sec)
+
+mysql> call calculateGrade(2, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(3, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(4, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(4, @class);//
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call calculateGrade(5, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  select * from result;//
++---------+----------+-------------+
+| rollNum | name     | grade       |
++---------+----------+-------------+
+|       1 | John Doe | N/A         |
+|       2 | Aditya   | Distinction |
+|       3 | Anurag   | Distinction |
+|       4 | Asim     | Distinction |
+|       5 | Aryan    | First Class |
++---------+----------+-------------+
+5 rows in set (0.00 sec)
+
+mysql> call calculateGrade(6, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(7, @class);//
+Query OK, 1 row affected (0.00 sec)
+
+mysql> call calculateGrade(8, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(9, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(10, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(11, @class);//
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`mahi52`.`result`, CONSTRAINT `result_ibfk_1` FOREIGN KEY (`rollNum`) REFERENCES `studentmarks` (`rollNum`))
+mysql>  select * from result;//
++---------+----------+---------------------+
+| rollNum | name     | grade               |
++---------+----------+---------------------+
+|       1 | John Doe | N/A                 |
+|       2 | Aditya   | Distinction         |
+|       3 | Anurag   | Distinction         |
+|       4 | Asim     | Distinction         |
+|       5 | Aryan    | First Class         |
+|       6 | Aneesh   | First Class         |
+|       7 | Abhishek | Higher Second Class |
+|       8 | Amit     | Higher Second Class |
+|       9 | Anay     | N/A                 |
+|      10 | mahindra | Distinction         |
++---------+----------+---------------------+
+10 rows in set (0.00 sec)
+
+mysql>
+mysql> call insertStudent(11,'Aryan',9089);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call calculateGrade(11, @class);//
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  select * from result;//
++---------+----------+---------------------+
+| rollNum | name     | grade               |
++---------+----------+---------------------+
+|       1 | John Doe | N/A                 |
+|       2 | Aditya   | Distinction         |
+|       3 | Anurag   | Distinction         |
+|       4 | Asim     | Distinction         |
+|       5 | Aryan    | First Class         |
+|       6 | Aneesh   | First Class         |
+|       7 | Abhishek | Higher Second Class |
+|       8 | Amit     | Higher Second Class |
+|       9 | Anay     | N/A                 |
+|      10 | mahindra | Distinction         |
+|      11 | Aryan    | N/A                 |
++---------+----------+---------------------+
+11 rows in set (0.00 sec)
+
+mysql>   
