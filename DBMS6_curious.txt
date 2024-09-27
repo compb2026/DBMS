@@ -1,0 +1,72 @@
+
+mysql> show databases;
++-----------------------------+
+| Database                    |
++-----------------------------+
+| computer_training_institute |
+| customer_order              |
+| emp                         |
+| employee                    |
+| information_schema          |
+| mysql                       |
+| performance_schema          |
+| sakila                      |
+| student                     |
+| sys                         |
+| world                       |
++-----------------------------+
+11 rows in set (0.07 sec)
+
+mysql> use mysql;
+Database changed
+mysql> create table student(id varchar(5) not null, m1 varchar(10) not null, m2 varchar(10) not null, m3 varchar(10) not null, primary key(id));
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> insert into student(id,m1,m2,m3) values ('1','40','40','40');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into student(id,m1,m2,m3) values ('2','50','40','40');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into student(id,m1,m2,m3) values ('3','50','70','70');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> delimiter ##
+mysql> create procedure grade()
+    -> begin
+    -> declare pid,pm1,pm2,pm3,pm int;
+    -> declare student_cursor cursor for select * from student;
+    -> open student_cursor;
+    -> cursor_student:loop
+    -> fetch student_cursor into pid,pm1,pm2,pm3;
+    -> set pm=(pm1+pm2+pm3)/3;
+    ->  if pm>=70 then select concat('distinction',pm) as "rows";
+    -> end if;
+    ->  if pm>=60 then select concat('first class',pm) as "rows";
+    -> end if;
+    -> end loop cursor_student;
+    -> close student_cursor;
+    -> end
+    -> ##
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> delimiter ;
+mysql> call grade();
++---------------+
+| rows          |
++---------------+
+| first class63 |
++---------------+
+1 row in set (0.01 sec)
+
+ERROR 1329 (02000): No data - zero rows fetched, selected, or processed
+mysql> call grade();
++---------------+
+| rows          |
++---------------+
+| first class63 |
++---------------+
+1 row in set (0.00 sec)
+
+ERROR 1329 (02000): No data - zero rows fetched, selected, or processed
+mysql>
